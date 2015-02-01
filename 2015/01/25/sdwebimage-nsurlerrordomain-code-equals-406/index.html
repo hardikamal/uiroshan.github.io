@@ -8,9 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="!">
 
-    <title>uiroshan's Blog</title>
+    <title>SDWebImage : NSURLErrorDomain - Code = 406 - uiroshan's Blog</title>
 
-    <link rel="canonical" href="http://uiroshan.github.io/">
+    <link rel="canonical" href="http://uiroshan.github.io/2015/01/25/sdwebimage-nsurlerrordomain-code-equals-406/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -75,47 +75,72 @@
 </nav>
 
 
-    <!-- Page Header -->
-<header class="intro-header" style="background-image: url('/img/home-bg.jpg')">
+    <!-- Post Header -->
+<header class="intro-header" style="background-image: url('/img/post-bg-01.jpg')">
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                <div class="site-heading">
-                    <h1>uiroshan's Blog</h1>
-                    <hr class="small">
-                    <span class="subheading">A Clean Blog Theme by Start Bootstrap</span>
+                <div class="post-heading">
+                    <h1>SDWebImage : NSURLErrorDomain - Code = 406</h1>
+                    
+                    <h2 class="subheading">Overriding request headers in SDWebImage</h2>
+                    
+                    <span class="meta">Posted by Upul Abayagunawardhana on January 25, 2015</span>
                 </div>
             </div>
         </div>
     </div>
 </header>
 
-<!-- Main Content -->
-<div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-			
-<div class="post-preview">
-    <a href="/2015/01/25/sdwebimage-nsurlerrordomain-code-equals-406/">
-        <h2 class="post-title">            SDWebImage : NSURLErrorDomain - Code = 406
-        </h2>
-        
-        <h3 class="post-subtitle">
-            Overriding request headers in SDWebImage
-        </h3>
-        
-    </a>
-    <p class="post-meta">Posted by Upul Abayagunawardhana on January 25, 2015</p>
-</div>
-<hr>
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
+				<p>The iOS project that I am working on, has decided to use some caching mechanism to improve perfomance and save bandwidth of the user. So as per the recommendation of some blogs and popularity, we have decided to go with SDWebImage cache. After inspecting example code and trying out some sample code I thought it’ll be good to use.</p>
+
+<p>But it wasn’t work with images those are retrieved from our sever. I have hardcoded public images found from the image search. There wasn’t any problem with those. I tried with different methods provided from the API. But the result is the same.</p>
+
+<p>I am getting following error instead of successful response.</p>
+
+<blockquote>
+  <p>Error Domain=NSURLErrorDomain Code=406 “The operation couldn’t be completed. (NSURLErrorDomain error 406.)”</p>
+</blockquote>
+
+<p>Following is the definition I found from the Wikipedia for HTTP status code 406.</p>
+
+<blockquote>
+  <p>406 Not Acceptable - The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request.</p>
+</blockquote>
+
+<p>I couldn’t find any satisfiable answers from any Q/A sites. So I have decided to read the source code and identify any possible problem / solution.</p>
+
+<p>After going through several classes, I found that <code>SDWebImageDownloader</code> class has a code related to setting the <code>'Accept'</code> header value into the request.</p>
+
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="n">_HTTPHeaders</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSMutableDictionary</span> <span class="nl">dictionaryWithObject</span><span class="p">:</span><span class="s">@&quot;image/webp,image/*;q=0.8&quot;</span> 
+                                                  <span class="nl">forKey</span><span class="p">:</span><span class="s">@&quot;Accept&quot;</span><span class="p">];</span></code></pre></div>
+
+<p>So above code caused me the problem. Once I changed it, caching started to work and work nicely. But that was a temporary solution, because it’s not good to change library source code. </p>
+
+<p>I was using <code>UIImageView</code> category provided by the library to retrieve and cache images. So it was problematic to set header values from there. Also only <code>SDWebImageDownloader</code> class providing the necessary API method to change the header value for public users. So at first sight I was so disappointed and thought of trying something else. But luckily <code>SDWebImageDownloader</code> is a singleton object. Every method is using the <code>SDWebImageDownloader downloadImageWithURL:options:progress:completed:</code> method to download images. So I have set a custom header value to <code>'Accept'</code> header to override the default header.</p>
+
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="p">[</span><span class="n">SDWebImageDownloader</span><span class="p">.</span><span class="n">sharedDownloader</span> <span class="nl">setValue</span><span class="p">:</span><span class="s">@&quot;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&quot;</span>
+                             <span class="nl">forHTTPHeaderField</span><span class="p">:</span><span class="s">@&quot;Accept&quot;</span><span class="p">];</span>
+<span class="p">[</span><span class="nb">self</span> <span class="nl">sd_setImageWithURL</span><span class="p">:[</span><span class="nb">self</span> <span class="nl">imageUrlForId</span><span class="p">:</span><span class="n">imageId</span><span class="p">]</span> <span class="nl">placeholderImage</span><span class="p">:</span><span class="n">image</span><span class="p">];</span></code></pre></div>
 
 
-<!-- Pager -->
+                <hr>
 
+                <ul class="pager">
+                    
+                    
+                </ul>
 
-		</div>
-	</div>
-</div>
+            </div>
+        </div>
+    </div>
+</article>
 
 <hr>
 

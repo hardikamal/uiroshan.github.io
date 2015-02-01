@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>uiroshan&#39;s Blog</title>
+    <description>!</description>
+    <link>http://uiroshan.github.io/</link>
+    <atom:link href="http://uiroshan.github.io/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Sun, 01 Feb 2015 18:46:17 +0530</pubDate>
+    <lastBuildDate>Sun, 01 Feb 2015 18:46:17 +0530</lastBuildDate>
+    <generator>Jekyll v2.5.3</generator>
+    
+      <item>
+        <title>SDWebImage : NSURLErrorDomain - Code = 406</title>
+        <description>&lt;p&gt;The iOS project that I am working on, has decided to use some caching mechanism to improve perfomance and save bandwidth of the user. So as per the recommendation of some blogs and popularity, we have decided to go with SDWebImage cache. After inspecting example code and trying out some sample code I thought it’ll be good to use.&lt;/p&gt;
+
+&lt;p&gt;But it wasn’t work with images those are retrieved from our sever. I have hardcoded public images found from the image search. There wasn’t any problem with those. I tried with different methods provided from the API. But the result is the same.&lt;/p&gt;
+
+&lt;p&gt;I am getting following error instead of successful response.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Error Domain=NSURLErrorDomain Code=406 “The operation couldn’t be completed. (NSURLErrorDomain error 406.)”&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Following is the definition I found from the Wikipedia for HTTP status code 406.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;406 Not Acceptable - The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I couldn’t find any satisfiable answers from any Q/A sites. So I have decided to read the source code and identify any possible problem / solution.&lt;/p&gt;
+
+&lt;p&gt;After going through several classes, I found that &lt;code&gt;SDWebImageDownloader&lt;/code&gt; class has a code related to setting the &lt;code&gt;&#39;Accept&#39;&lt;/code&gt; header value into the request.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-objc&quot; data-lang=&quot;objc&quot;&gt;&lt;span class=&quot;n&quot;&gt;_HTTPHeaders&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;NSMutableDictionary&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;dictionaryWithObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;@&amp;quot;image/webp,image/*;q=0.8&amp;quot;&lt;/span&gt; 
+                                                  &lt;span class=&quot;nl&quot;&gt;forKey&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;@&amp;quot;Accept&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;So above code caused me the problem. Once I changed it, caching started to work and work nicely. But that was a temporary solution, because it’s not good to change library source code. &lt;/p&gt;
+
+&lt;p&gt;I was using &lt;code&gt;UIImageView&lt;/code&gt; category provided by the library to retrieve and cache images. So it was problematic to set header values from there. Also only &lt;code&gt;SDWebImageDownloader&lt;/code&gt; class providing the necessary API method to change the header value for public users. So at first sight I was so disappointed and thought of trying something else. But luckily &lt;code&gt;SDWebImageDownloader&lt;/code&gt; is a singleton object. Every method is using the &lt;code&gt;SDWebImageDownloader downloadImageWithURL:options:progress:completed:&lt;/code&gt; method to download images. So I have set a custom header value to &lt;code&gt;&#39;Accept&#39;&lt;/code&gt; header to override the default header.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-objc&quot; data-lang=&quot;objc&quot;&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SDWebImageDownloader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sharedDownloader&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;setValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;@&amp;quot;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&amp;quot;&lt;/span&gt;
+                             &lt;span class=&quot;nl&quot;&gt;forHTTPHeaderField&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;@&amp;quot;Accept&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;sd_setImageWithURL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:[&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;imageUrlForId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;imageId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;placeholderImage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+</description>
+        <pubDate>Sun, 25 Jan 2015 15:27:51 +0530</pubDate>
+        <link>http://uiroshan.github.io/2015/01/25/sdwebimage-nsurlerrordomain-code-equals-406/</link>
+        <guid isPermaLink="true">http://uiroshan.github.io/2015/01/25/sdwebimage-nsurlerrordomain-code-equals-406/</guid>
+        
+        
+      </item>
+    
+  </channel>
+</rss>
