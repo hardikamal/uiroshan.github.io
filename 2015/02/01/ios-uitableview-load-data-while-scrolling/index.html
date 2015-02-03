@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="!">
+
+    <title>iOS UITableView : Load data while scrolling - uiroshan's Blog</title>
+
+    <link rel="canonical" href="http://uiroshan.github.io/2015/02/01/ios-uitableview-load-data-while-scrolling/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/clean-blog.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+
+<body>
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">uiroshan's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                
+                <li>
+                    <a href="/about/">About</a>
+                </li>
+                
+                <li>
+                    <a href="/contact/">Contact</a>
+                </li>
+                
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+    <!-- Post Header -->
+<header class="intro-header" style="background-image: url('/img/post-bg-01.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <h1>iOS UITableView : Load data while scrolling</h1>
+                    
+                    <h2 class="subheading">iOS pagination example.</h2>
+                    
+                    <span class="meta">Posted by Upul Abayagunawardhana on February 1, 2015</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
+				<p>I did a small POC on how to load data automatically while scrolling the table view. Data is loading over network using a rest API. So I have choose a 500px API to load set of photos. They are providing API to load featured photos and that has lot of data. So they have providing data as pages. (Which is exactly what I wanted.)</p>
+
+<p>We should have a array to keep loaded data in the memory. I have named this array as photos. This will be the data source for the UITableView. We are dynamically updating this array after each successful data retrieval. So it should be mutable.</p>
+
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="k">@property</span> <span class="p">(</span><span class="k">nonatomic</span><span class="p">,</span> <span class="k">strong</span><span class="p">)</span> <span class="bp">NSMutableArray</span> <span class="o">*</span><span class="n">photos</span><span class="p">;</span></code></pre></div>
+
+<p>Keep private properties to keep track of current page and total number of pages. These two variables will be use to decide whether application should make a request to load more data from the server. 500px API is returning totalNumber of items in their API. For the approach I am using currentPage variable and totalPages will be enough. But for more safety I will add another variable to keep track of totalItems as well.</p>
+
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="k">@property</span> <span class="p">(</span><span class="k">nonatomic</span><span class="p">,</span> <span class="k">assign</span><span class="p">)</span> <span class="bp">NSInteger</span> <span class="n">currentPage</span><span class="p">;</span>
+<span class="k">@property</span> <span class="p">(</span><span class="k">nonatomic</span><span class="p">,</span> <span class="k">assign</span><span class="p">)</span> <span class="bp">NSInteger</span> <span class="n">totalPages</span><span class="p">;</span>
+<span class="k">@property</span> <span class="p">(</span><span class="k">nonatomic</span><span class="p">,</span> <span class="k">assign</span><span class="p">)</span> <span class="bp">NSInteger</span> <span class="n">totalItems</span><span class="p">;</span></code></pre></div>
+
+<p>To load data, I wrote a separate method, which will accept page parameter. After a successful response, photos array will be updated with new elements. In addition to that currentPage, totalPages and totalItems properties will also updated / reset according to the server response. Usually updating the value once is sufficient. But I am expecting two advantages with approach. </p>
+
+<ul>
+  <li>If the system updating frequently, new data will be available at any time. So problem of not having updated data will avoid with this.</li>
+  <li>Sometimes because of programming errors values of above properties will take wrong values. So we can be confident about having correct page numbers.</li>
+</ul>
+
+<p>Finally we are reload data in the table view. </p>
+
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">loadPhotos:</span><span class="p">(</span><span class="bp">NSInteger</span><span class="p">)</span><span class="nv">page</span> <span class="p">{</span>
+    
+    <span class="bp">NSString</span> <span class="o">*</span><span class="n">apiURL</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSString</span> <span class="nl">stringWithFormat</span><span class="p">:</span><span class="s">@&quot;https://api.500px.com/v1/photos?feature=editors&amp;page=%ld&amp;consumer_key=%@&quot;</span><span class="p">,(</span><span class="kt">long</span><span class="p">)</span><span class="n">page</span><span class="p">,</span><span class="n">kConsumerKey</span><span class="p">];</span>
+    
+    <span class="bp">NSURLSession</span> <span class="o">*</span><span class="n">session</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSURLSession</span> <span class="n">sharedSession</span><span class="p">];</span>
+    <span class="p">[[</span><span class="n">session</span> <span class="nl">dataTaskWithURL</span><span class="p">:[</span><span class="bp">NSURL</span> <span class="nl">URLWithString</span><span class="p">:</span><span class="n">apiURL</span><span class="p">]</span>
+            <span class="nl">completionHandler</span><span class="p">:</span><span class="o">^</span><span class="p">(</span><span class="bp">NSData</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span>
+                                <span class="bp">NSURLResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">,</span>
+                                <span class="bp">NSError</span> <span class="o">*</span><span class="n">error</span><span class="p">)</span> <span class="p">{</span>
+                
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">error</span><span class="p">)</span> <span class="p">{</span>
+                    
+                    <span class="bp">NSError</span> <span class="o">*</span><span class="n">jsonError</span> <span class="o">=</span> <span class="nb">nil</span><span class="p">;</span>
+                    <span class="bp">NSMutableDictionary</span> <span class="o">*</span><span class="n">jsonObject</span> <span class="o">=</span> <span class="p">(</span><span class="bp">NSMutableDictionary</span> <span class="o">*</span><span class="p">)[</span><span class="bp">NSJSONSerialization</span> <span class="nl">JSONObjectWithData</span><span class="p">:</span><span class="n">data</span> <span class="nl">options</span><span class="p">:</span><span class="n">NSJSONReadingMutableContainers</span> <span class="nl">error</span><span class="p">:</span><span class="o">&amp;</span><span class="n">jsonError</span><span class="p">];</span>
+                    
+                    <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">photos</span> <span class="nl">addObjectsFromArray</span><span class="p">:[</span><span class="n">jsonObject</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="s">@&quot;photos&quot;</span><span class="p">]];</span>
+                    
+                    <span class="nb">self</span><span class="p">.</span><span class="n">currentPage</span> <span class="o">=</span> <span class="p">[[</span><span class="n">jsonObject</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="s">@&quot;current_page&quot;</span><span class="p">]</span> <span class="n">integerValue</span><span class="p">];</span>
+                    <span class="nb">self</span><span class="p">.</span><span class="n">totalPages</span>  <span class="o">=</span> <span class="p">[[</span><span class="n">jsonObject</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="s">@&quot;total_pages&quot;</span><span class="p">]</span> <span class="n">integerValue</span><span class="p">];</span>
+                    <span class="nb">self</span><span class="p">.</span><span class="n">totalItems</span>  <span class="o">=</span> <span class="p">[[</span><span class="n">jsonObject</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="s">@&quot;total_items&quot;</span><span class="p">]</span> <span class="n">integerValue</span><span class="p">];</span>
+                    
+                    <span class="n">dispatch_async</span><span class="p">(</span><span class="n">dispatch_get_main_queue</span><span class="p">(),</span> <span class="o">^</span><span class="p">{</span>
+                        <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">tableView</span> <span class="n">reloadData</span><span class="p">];</span>
+                    <span class="p">});</span>
+                <span class="p">}</span>
+            <span class="p">}]</span> <span class="n">resume</span><span class="p">];</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Now the things about the UITableView. When deciding number of rows, we should first check whether there are more data to load. If the current page is equal to totalNumber pages that means we are done. We loaded all the available data from the server. For more safety we can check for totalItems with the size of the photos array. If current page is not equal to total number of pages, We increment the numer of rows by 1 to show a additional cell with loading activity indicator.</p>
+
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="p">-</span> <span class="p">(</span><span class="bp">NSInteger</span><span class="p">)</span><span class="nf">tableView:</span><span class="p">(</span><span class="bp">UITableView</span> <span class="o">*</span><span class="p">)</span><span class="nv">tableView</span> <span class="nf">numberOfRowsInSection:</span><span class="p">(</span><span class="bp">NSInteger</span><span class="p">)</span><span class="nv">section</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">currentPage</span> <span class="o">==</span> <span class="nb">self</span><span class="p">.</span><span class="n">totalPages</span>
+        <span class="o">||</span> <span class="nb">self</span><span class="p">.</span><span class="n">totalItems</span> <span class="o">==</span> <span class="nb">self</span><span class="p">.</span><span class="n">photos</span><span class="p">.</span><span class="n">count</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nb">self</span><span class="p">.</span><span class="n">photos</span><span class="p">.</span><span class="n">count</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nb">self</span><span class="p">.</span><span class="n">photos</span><span class="p">.</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>In tableView:willDisplayCell:forRowAtIndexPath: method, we checking whether the cell which going to display is last cell. That’s the cell with the loading activity indicator. If so we are making a server call to load data for next page.</p>
+
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">tableView:</span><span class="p">(</span><span class="bp">UITableView</span> <span class="o">*</span><span class="p">)</span><span class="nv">tableView</span> <span class="nf">willDisplayCell:</span><span class="p">(</span><span class="bp">UITableViewCell</span> <span class="o">*</span><span class="p">)</span><span class="nv">cell</span> <span class="nf">forRowAtIndexPath:</span><span class="p">(</span><span class="bp">NSIndexPath</span> <span class="o">*</span><span class="p">)</span><span class="nv">indexPath</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">indexPath</span><span class="p">.</span><span class="n">row</span> <span class="o">==</span> <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">photos</span> <span class="n">count</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="p">[</span><span class="nb">self</span> <span class="nl">loadPhotos</span><span class="p">:</span><span class="o">++</span><span class="nb">self</span><span class="p">.</span><span class="n">currentPage</span><span class="p">];</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Here’s body for tableView:cellForRowAtIndexPath: method. If the cell is last cell, we are first showing the loading indicator. Otherwise we are constructing the cell with current element of the photos array. Here you’ll see a strage method which has a sd_ prefix. This is not a standard method of UIImageView class. I did a small improvement to cache images locally using SDWebImage library.</p>
+
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="p">-</span> <span class="p">(</span><span class="bp">UITableViewCell</span> <span class="o">*</span><span class="p">)</span><span class="nf">tableView:</span><span class="p">(</span><span class="bp">UITableView</span> <span class="o">*</span><span class="p">)</span><span class="nv">tableView</span> <span class="nf">cellForRowAtIndexPath:</span><span class="p">(</span><span class="bp">NSIndexPath</span> <span class="o">*</span><span class="p">)</span><span class="nv">indexPath</span> <span class="p">{</span>
+    
+    <span class="bp">UITableViewCell</span> <span class="o">*</span><span class="n">cell</span> <span class="o">=</span> <span class="nb">nil</span><span class="p">;</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">indexPath</span><span class="p">.</span><span class="n">row</span> <span class="o">==</span> <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">photos</span> <span class="n">count</span><span class="p">])</span> <span class="p">{</span>
+    
+        <span class="n">cell</span> <span class="o">=</span> <span class="p">[</span><span class="n">tableView</span> <span class="nl">dequeueReusableCellWithIdentifier</span><span class="p">:</span><span class="s">@&quot;LoadingCell&quot;</span> <span class="nl">forIndexPath</span><span class="p">:</span><span class="n">indexPath</span><span class="p">];</span>
+        <span class="bp">UIActivityIndicatorView</span> <span class="o">*</span><span class="n">activityIndicator</span> <span class="o">=</span> <span class="p">(</span><span class="bp">UIActivityIndicatorView</span> <span class="o">*</span><span class="p">)[</span><span class="n">cell</span><span class="p">.</span><span class="n">contentView</span> <span class="nl">viewWithTag</span><span class="p">:</span><span class="mi">100</span><span class="p">];</span>
+        <span class="p">[</span><span class="n">activityIndicator</span> <span class="n">startAnimating</span><span class="p">];</span>
+        
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        
+        <span class="n">cell</span> <span class="o">=</span> <span class="p">[</span><span class="n">tableView</span> <span class="nl">dequeueReusableCellWithIdentifier</span><span class="p">:</span><span class="s">@&quot;Cell&quot;</span> <span class="nl">forIndexPath</span><span class="p">:</span><span class="n">indexPath</span><span class="p">];</span>
+    
+        <span class="bp">NSDictionary</span> <span class="o">*</span><span class="n">photoItem</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="n">photos</span><span class="p">[</span><span class="n">indexPath</span><span class="p">.</span><span class="n">row</span><span class="p">];</span>
+        <span class="n">cell</span><span class="p">.</span><span class="n">textLabel</span><span class="p">.</span><span class="n">text</span> <span class="o">=</span> <span class="p">[</span><span class="n">photoItem</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="s">@&quot;name&quot;</span><span class="p">];</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">[[</span><span class="n">photoItem</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="s">@&quot;description&quot;</span><span class="p">]</span> <span class="nl">isEqual</span><span class="p">:[</span><span class="bp">NSNull</span> <span class="n">null</span><span class="p">]])</span> <span class="p">{</span>
+            <span class="n">cell</span><span class="p">.</span><span class="n">detailTextLabel</span><span class="p">.</span><span class="n">text</span> <span class="o">=</span> <span class="p">[</span><span class="n">photoItem</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="s">@&quot;description&quot;</span><span class="p">];</span>
+        <span class="p">}</span>
+        
+        <span class="p">[</span><span class="n">cell</span><span class="p">.</span><span class="n">imageView</span> <span class="nl">sd_setImageWithURL</span><span class="p">:[</span><span class="bp">NSURL</span> <span class="nl">URLWithString</span><span class="p">:[</span><span class="n">photoItem</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="s">@&quot;image_url&quot;</span><span class="p">]]</span>
+                          <span class="nl">placeholderImage</span><span class="p">:[</span><span class="bp">UIImage</span> <span class="nl">imageNamed</span><span class="p">:</span><span class="s">@&quot;placeholder.jpg&quot;</span><span class="p">]</span>
+                                 <span class="nl">completed</span><span class="p">:</span><span class="o">^</span><span class="p">(</span><span class="bp">UIImage</span> <span class="o">*</span><span class="n">image</span><span class="p">,</span> <span class="bp">NSError</span> <span class="o">*</span><span class="n">error</span><span class="p">,</span> <span class="n">SDImageCacheType</span> <span class="n">cacheType</span><span class="p">,</span> <span class="bp">NSURL</span> <span class="o">*</span><span class="n">imageURL</span><span class="p">)</span> <span class="p">{</span>
+                                     <span class="k">if</span> <span class="p">(</span><span class="n">error</span><span class="p">)</span> <span class="p">{</span>
+                                         <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;Error occured : %@&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">error</span> <span class="n">description</span><span class="p">]);</span>
+                                     <span class="p">}</span>
+        <span class="p">}];</span>
+    <span class="p">}</span>
+    
+    <span class="k">return</span> <span class="n">cell</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<h4 id="server-api-considerations">Server API considerations.</h4>
+
+<p>If your API has lot of data to return, then I suggest to use pagination. Without just returning data for requested page, it’ll be helpful to developers to if the API is returning current page, totoal pages, total items count with the response. These information will be change according to the data you have. But without maintaining lot of data locally inside phone / browser we can use server if those are included in response.</p>
+
+<p>Some APIs returning only total items without returning the total number of pages. For such occasions we can calculate the total number of pages using following method. <a href="http://stackoverflow.com/a/1611243/1208276">Source</a>.</p>
+
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="n">totalPages</span> <span class="o">=</span> <span class="p">(</span><span class="n">totalCount</span> <span class="o">+</span> <span class="n">pageSize</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">pageSize</span><span class="p">;</span></code></pre></div>
+
+<p><a href="https://drive.google.com/file/d/0B1EINoPkBNmfWlcwQUlnMWctUXM/view?usp=sharing">XCode project source code</a></p>
+
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/01/25/sdwebimage-nsurlerrordomain-code-equals-406/" data-toggle="tooltip" data-placement="top" title="SDWebImage : NSURLErrorDomain - Code = 406">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+<hr>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://twitter.com/uiroshan">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    
+                    <li>
+                        <a href="https://github.com/uiroshan">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">Copyright &copy; uiroshan's Blog 2015</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/clean-blog.min.js "></script>
+
+
+</body>
+
+</html>
