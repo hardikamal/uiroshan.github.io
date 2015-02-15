@@ -8,9 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="!">
 
-    <title>uiroshan's Blog</title>
+    <title>Build IPA using XCodeBuild Command - uiroshan's Blog</title>
 
-    <link rel="canonical" href="http://uiroshan.github.io/">
+    <link rel="canonical" href="http://uiroshan.github.io/2015/02/14/build-ipa-using-xcodebuild-command/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -75,75 +75,66 @@
 </nav>
 
 
-    <!-- Page Header -->
-<header class="intro-header" style="background-image: url('/img/home-bg.jpg')">
+    <!-- Post Header -->
+<header class="intro-header" style="background-image: url('/img/post-bg-01.jpg')">
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                <div class="site-heading">
-                    <h1>uiroshan's Blog</h1>
-                    <hr class="small">
-                    <span class="subheading">A Clean Blog Theme by Start Bootstrap</span>
+                <div class="post-heading">
+                    <h1>Build IPA using XCodeBuild Command</h1>
+                    
+                    <h2 class="subheading">Alternative method to build IPA without XCRun command.</h2>
+                    
+                    <span class="meta">Posted by Upul Abayagunawardhana on February 14, 2015</span>
                 </div>
             </div>
         </div>
     </div>
 </header>
 
-<!-- Main Content -->
-<div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-			
-<div class="post-preview">
-    <a href="/2015/02/14/build-ipa-using-xcodebuild-command/">
-        <h2 class="post-title">            Build IPA using XCodeBuild Command
-        </h2>
-        
-        <h3 class="post-subtitle">
-            Alternative method to build IPA without XCRun command.
-        </h3>
-        
-    </a>
-    <p class="post-meta">Posted by Upul Abayagunawardhana on February 14, 2015</p>
-</div>
-<hr>
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 
-<div class="post-preview">
-    <a href="/2015/02/01/ios-uitableview-load-data-while-scrolling/">
-        <h2 class="post-title">            iOS UITableView : Load data while scrolling
-        </h2>
-        
-        <h3 class="post-subtitle">
-            iOS pagination example.
-        </h3>
-        
-    </a>
-    <p class="post-meta">Posted by Upul Abayagunawardhana on February 1, 2015</p>
-</div>
-<hr>
+				<p>There will be plenty of posts about the same topic can be found on the internet. But I am writing it again, just to make a note for myself. Also another thing I noticed, most of the posts are using xcrun command to package IPA. But XCodebuild also has ability to package as an IPA.</p>
 
-<div class="post-preview">
-    <a href="/2015/01/25/sdwebimage-nsurlerrordomain-code-equals-406/">
-        <h2 class="post-title">            SDWebImage : NSURLErrorDomain - Code = 406
-        </h2>
-        
-        <h3 class="post-subtitle">
-            Overriding request headers in SDWebImage
-        </h3>
-        
-    </a>
-    <p class="post-meta">Posted by Upul Abayagunawardhana on January 25, 2015</p>
-</div>
-<hr>
+<p>There are two steps to build an IPA. First we have to archive our project.</p>
+
+<ul>
+  <li>If you are using workspace you will have to provide workspace and sheme as inputs to the xcodebuild command. If you are using one xcode project with multiple targets, specifying target will be enough.</li>
+  <li>we can specify the path to store final out put archive file as archivePath.</li>
+</ul>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">xcodebuild -workspace MySimpleApp.xcworkspace/ -scheme Simple -archivePath ../archives/simple  clean archive</code></pre></div>
+
+<p>Next we have to export our archive into IPA. For this we have to provide export format as IPA, archive path and export path. </p>
+
+<ul>
+  <li>exportProvisioningProfile option Specifies the provisioning profile that should be used when exporting the archive. Name of the provisioning profile can be found from the developer portal</li>
+</ul>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">xcodebuild -exportArchive -exportFormat IPA -archivePath ../archives/simple.xcarchive -exportPath Tobys.ipa -exportProvisioningProfile <span class="s1">&#39;XC Ad Hoc: io.github.uiroshan&#39;</span></code></pre></div>
+
+<p>References : <a href="https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man1/xcodebuild.1.html">xcodebuild man page</a></p>
 
 
-<!-- Pager -->
+                <hr>
 
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/02/01/ios-uitableview-load-data-while-scrolling/" data-toggle="tooltip" data-placement="top" title="iOS UITableView : Load data while scrolling">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
 
-		</div>
-	</div>
-</div>
+            </div>
+        </div>
+    </div>
+</article>
 
 <hr>
 
