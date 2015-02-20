@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>http://uiroshan.github.io/2015/02/14/build-ipa-using-xcodebuild-command/</loc>
+    <lastmod>2015-02-14T21:00:00+05:30</lastmod>
+  </url>
+  <url>
+    <loc>http://uiroshan.github.io/2015/02/01/ios-uitableview-load-data-while-scrolling/</loc>
+    <lastmod>2015-02-01T21:00:00+05:30</lastmod>
+  </url>
+  <url>
+    <loc>http://uiroshan.github.io/2015/01/25/sdwebimage-nsurlerrordomain-code-equals-406/</loc>
+    <lastmod>2015-01-25T15:27:51+05:30</lastmod>
+  </url>
+  <url>
+    <loc>http://uiroshan.github.io/about/</loc>
+    <lastmod>2015-02-20T07:11:32+05:30</lastmod>
+  </url>
+  <url>
+    <loc>http://uiroshan.github.io/contact/</loc>
+    <lastmod>2015-02-20T07:11:32+05:30</lastmod>
+  </url>
+  <url>
+    <loc>http://uiroshan.github.io/</loc>
+    <lastmod>2015-02-20T07:11:32+05:30</lastmod>
+  </url>
+</urlset>
