@@ -5,9 +5,63 @@
     <description>!</description>
     <link>http://uiroshan.github.io/</link>
     <atom:link href="http://uiroshan.github.io/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 01 Mar 2015 16:35:43 +0530</pubDate>
-    <lastBuildDate>Sun, 01 Mar 2015 16:35:43 +0530</lastBuildDate>
+    <pubDate>Sun, 08 Mar 2015 08:59:31 +0530</pubDate>
+    <lastBuildDate>Sun, 08 Mar 2015 08:59:31 +0530</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
+    
+      <item>
+        <title>Blogging with Jekyll</title>
+        <description>&lt;h1 id=&quot;blogging-with-jekyll&quot;&gt;Blogging with Jekyll&lt;/h1&gt;
+
+&lt;p&gt;Sometime ago, I have started using octopress and deployed it on Github pages. I was attracted to simplicity of the octopress and look and feel it had. So I decided to give it a shot and created a Github Pages site and deployed. The only disadvantage I saw with octopress is, If you are working on multiple machines you should have octopress setup on each machine. And I wasn’t really satisfied with number of templates it had. Those were not that much attractive. So sometimes I tried to convert a nice templates to octopress version and got failed. &lt;/p&gt;
+
+&lt;p&gt;Then oneday I found a nice clean &lt;a href=&quot;http://jekyllthemes.org/&quot;&gt;template site&lt;/a&gt;, which is for jekyll. Then I got confused and started to explore about jekyll. I knew there is a connection between octopress and jekyll. But I wasn’t sure what really it is. So here is my findings on both tools.&lt;/p&gt;
+
+&lt;h3 id=&quot;what-is-jekyll&quot;&gt;What is Jekyll?&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Jekyll is a simple, blog-aware, static site generator&lt;/strong&gt;. It takes a template directory containing raw text files in various formats, runs it through a converter (like Markdown) and our Liquid renderer, and spits out a complete, ready-to-publish static website suitable for serving with your favorite web server. &lt;strong&gt;Jekyll also happens to be the engine behind GitHub Pages, which means you can use Jekyll to host your project’s page, blog, or website from GitHub’s servers for free.&lt;/strong&gt; (&lt;a href=&quot;http://jekyllrb.com/docs/home/#so-what-is-jekyll-exactly&quot;&gt;from So what is Jekyll, exactly?&lt;/a&gt;)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;how-octopress-different-from-jekyll&quot;&gt;How Octopress different from Jekyll?&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Octopress is a framework designed by Brandon Mathis for Jekyll&lt;/strong&gt;, the blog aware static site generator powering Github Pages. &lt;strong&gt;To start blogging with Jekyll, you have to write your own HTML templates, CSS, Javascripts and set up your configuration. But with Octopress All of that is already taken care of.&lt;/strong&gt; Simply clone or fork Octopress, install dependencies and the theme, and you’re set. (&lt;a href=&quot;http://octopress.org/2011/07/23/octopress-20-surfaces/&quot;&gt;from Octopress 2.0 Surfaces&lt;/a&gt;)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;So I understood the relationship between two and have tested on my local machine. As I understood Octopress bundle some plugins in the distribution with jekyll blogging site. I had few more things to clarify before moving forward.&lt;/p&gt;
+
+&lt;h3 id=&quot;how-to-convert-a-jekyll-theme-to-octopress-theme&quot;&gt;How to convert a Jekyll theme to Octopress theme?&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;You can’t.&lt;/strong&gt; The author of Octopress made his own theme layout and plugins to support it. &lt;strong&gt;Jekyll is meant for you to create your own theme layout as you wish (it’s barebones).&lt;/strong&gt; Think of Jekyll as a great framework to write your own static site, a store front or a wiki or a blog - from scratch. &lt;strong&gt;Octopress, on the other hand though, adds a framework on top of Jekyll: theme layout, a number of plugins defaulted for a blog site, SEO throughout the templates, a config file for controlling this framework-on-top-of-a-framework (Octopress framework on top of Jekyll framework).&lt;/strong&gt; Basically, you can take Jekyll and write your own theme layout any way you wish; but &lt;strong&gt;with Octopress, you already have a strict theme layout to adhere to.&lt;/strong&gt; (&lt;a href=&quot;http://stackoverflow.com/a/23692322/1208276&quot;&gt;Stackoverflow answer by eduncan911&lt;/a&gt;)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;deploying-into-github-pages&quot;&gt;Deploying into Github pages&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;Every GitHub Page is run through Jekyll when you push content to a specially named branch within your repository. For User Pages, use the master branch in your username.github.io repository. For Project Pages, use the gh-pages branch in your project’s repository. Because a normal HTML site is also a valid Jekyll site, you don’t have to do anything special to keep your standard HTML files unchanged. Jekyll has thorough documentation that covers its features and usage. Simply start committing Jekyll formatted files and you’ll be using Jekyll in no time.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This means Github pages supports jekyll by default. Also Github pages runs on Jekyll. So we don’t need to build html site to deploy. Github pages does that for us. But as I saw Github pages does not support all the Jekyll plugins may be for security reasons. So I am pushing the generated html content to the master branch of my repository.&lt;/p&gt;
+
+&lt;h3 id=&quot;code-snippet-highlighting&quot;&gt;Code snippet highlighting&lt;/h3&gt;
+
+&lt;p&gt;One of the most wanted feature for me is code snipplet highlighting. There are various options. Here’s the Jekyll recommended way.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Install python.&lt;/li&gt;
+  &lt;li&gt;Install pip &lt;code&gt;sudo easy_install pip&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Install pygments with pip &lt;code&gt;pip install Pygments&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Now you can use code snipplets wrap with &lt;code&gt;highlight&lt;/code&gt; tags in your markdown source.&lt;/li&gt;
+  &lt;li&gt;All the short codes available at &lt;a href=&quot;http://pygments.org/docs/lexers/&quot;&gt;pygments.org/docs/lexers&lt;/a&gt;. &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Objective C short names - &lt;code&gt;objective-c&lt;/code&gt;, &lt;code&gt;objectivec&lt;/code&gt;, &lt;code&gt;obj-c&lt;/code&gt;, &lt;code&gt;objc&lt;/code&gt;&lt;/p&gt;
+
+</description>
+        <pubDate>Sun, 08 Mar 2015 09:00:00 +0530</pubDate>
+        <link>http://uiroshan.github.io/2015/03/08/blogging-with-jekyll/</link>
+        <guid isPermaLink="true">http://uiroshan.github.io/2015/03/08/blogging-with-jekyll/</guid>
+        
+        
+      </item>
     
       <item>
         <title>Build IPA using XCodeBuild Command</title>
